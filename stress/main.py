@@ -27,7 +27,7 @@ if __name__ == "__main__":
     print("STEP 1 - Subject Information")
     get_user_info()
     
-    input_file = "data/raw_serial_data.txt"
+    input_file = "data/noeldata.txt"
     if not os.path.exists(input_file):
         print(f"\nError: The file '{input_file}' was not found.")
         print("Please place your raw text file at that location and run the script again.")

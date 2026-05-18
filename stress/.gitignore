@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+
+# Environment variables
+.env
+
+# Firebase Credentials
+firebase/firebase_key.json
+firebase/*.json
+
+# Data outputs and logs
+data/raw_serial_data.txt
+data/cleaned_output.csv
+data/user_info.txt
+data/

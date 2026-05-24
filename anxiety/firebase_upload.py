@@ -17,6 +17,15 @@ if not firebase_admin._apps:
     except Exception as e:
         print(f"Warning: Firebase initialization failed. Please ensure '{FIREBASE_KEY_PATH}' exists.\nError: {e}")
 
+def fetch_user_id():
+    try:
+        # Fetching from a generic 'current_user_id' node. Adjust path if necessary.
+        ref = db.reference('current_user_id')
+        return ref.get()
+    except Exception as e:
+        print(f"Failed to fetch user ID: {e}")
+        return None
+
 def get_user_name():
     try:
         with open('data/user_info.txt', 'r', encoding='utf-8') as f:
@@ -35,10 +44,16 @@ def upload_result(result_df):
     try:
         # We upload the most recent window result to match the Colab logic
         latest_data = result_df.iloc[-1].to_dict()
-        latest_data['User_Name'] = get_user_name()
+        
+        filtered_data = {
+            'Time': latest_data.get('Time'),
+            'Anxiety_Status': latest_data.get('Anxiety_Status'),
+            'Predicted_Label': latest_data.get('Predicted_Label'),
+            'User_Name': get_user_name()
+        }
         
         ref = db.reference('anxiety_monitoring/latest')
-        ref.set(latest_data)
-        print(f'Successfully uploaded latest prediction for {latest_data["User_Name"]} to Firebase!')
+        ref.set(filtered_data)
+        print(f'Successfully uploaded latest prediction for {filtered_data["User_Name"]} to Firebase!')
     except Exception as e:
         print(f"Failed to upload to Firebase: {e}")

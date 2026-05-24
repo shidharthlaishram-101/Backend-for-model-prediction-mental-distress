@@ -1,7 +1,7 @@
 import pandas as pd
 import os
 
-def preprocess_data(input_csv):
+def preprocess_data(input_csv, output_path='data/processed/processed_data.csv'):
     try:
         df = pd.read_csv(input_csv)
     except FileNotFoundError:
@@ -18,7 +18,6 @@ def preprocess_data(input_csv):
     if 'eda' in df.columns:
         df['eda'] = pd.to_numeric(df['eda'], errors='coerce').ffill().bfill()
 
-    output_path = 'data/processed/processed_data.csv'
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
     df.to_csv(output_path, index=False)
     

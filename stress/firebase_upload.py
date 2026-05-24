@@ -19,9 +19,14 @@ if not firebase_admin._apps:
 
 def fetch_user_id():
     try:
-        # Fetching from a generic 'current_user_id' node. Adjust path if necessary.
-        ref = db.reference('current_user_id')
-        return ref.get()
+        ref = db.reference('active_session')
+        sessions = ref.get()
+        if sessions:
+            pending_sessions = {k: v for k, v in sessions.items() if v.get('status') == 'pending'}
+            if pending_sessions:
+                sorted_sessions = sorted(pending_sessions.items(), key=lambda x: x[1].get('timestamp', ''))
+                return sorted_sessions[0][0]
+        return None
     except Exception as e:
         print(f"Failed to fetch user ID: {e}")
         return None
@@ -36,7 +41,7 @@ def get_user_name():
         pass
     return "Unknown User"
 
-def upload_result(result_df):
+def upload_result(result_df, uid=None):
     if result_df.empty:
         print("No predictions to upload.")
         return
@@ -46,14 +51,18 @@ def upload_result(result_df):
         latest_data = result_df.iloc[-1].to_dict()
         
         filtered_data = {
-            'Time': latest_data.get('Time'),
             'Stress_Status': latest_data.get('Stress_Status'),
-            'Predicted_Label': latest_data.get('Predicted_Label'),
-            'User_Name': get_user_name()
+            'Predicted_Label': latest_data.get('Predicted_Label')
         }
         
-        ref = db.reference('stress_monitoring/latest')
-        ref.set(filtered_data)
-        print(f'Successfully uploaded latest prediction for {filtered_data["User_Name"]} to Firebase!')
+        if uid:
+            ref = db.reference(f'stress_monitoring/{uid}')
+            ref.set(filtered_data)
+            db.reference(f'active_session/{uid}').update({'status': 'done'})
+            print(f'Successfully uploaded prediction for {filtered_data["User_Name"]} to stress_monitoring/{uid}!')
+        else:
+            ref = db.reference('stress_monitoring/latest')
+            ref.set(filtered_data)
+            print(f'Successfully uploaded latest prediction for {filtered_data["User_Name"]} to Firebase!')
     except Exception as e:
         print(f"Failed to upload to Firebase: {e}")

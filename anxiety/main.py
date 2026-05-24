@@ -8,7 +8,7 @@ from txt_to_csv_converter import convert_and_clean_txt
 from preprocessing import preprocess_data
 from feature_extraction import extract_features
 from prediction import predict_anxiety
-from firebase_upload import upload_result
+from firebase_upload import upload_result, fetch_user_id
 
 def setup_folders():
     text_dir = '../text file'
@@ -67,7 +67,12 @@ if __name__ == "__main__":
                 print(result_df[['Time', 'Anxiety_Status']].tail())
                 
                 print("\nSTEP 6 - Upload to Firebase")
-                upload_result(result_df)
+                uid = fetch_user_id()
+                if uid:
+                    print(f"Active session found with UID: {uid}")
+                else:
+                    print("No active pending session found. Uploading to latest.")
+                upload_result(result_df, uid=uid)
                 print('\nFULL PIPELINE COMPLETED')
             else:
                 print("Prediction failed.")

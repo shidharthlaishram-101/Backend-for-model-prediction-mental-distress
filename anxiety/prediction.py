@@ -11,7 +11,7 @@ FEATURE_COLUMNS = [
     "eda_mean", "eda_std", "eda_min", "eda_max", "eda_slope", "eda_npeaks"
 ]
 
-def predict_anxiety(merged_df):
+def predict_anxiety(merged_df, output_path='data/predictions/final_predictions.csv'):
     if merged_df.empty:
         return pd.DataFrame()
         
@@ -40,7 +40,6 @@ def predict_anxiety(merged_df):
     label_map = {0: 'Baseline', 1: 'Anxiety'}
     result_df['Anxiety_Status'] = result_df['Predicted_Label'].map(label_map)
     
-    output_path = 'data/predictions/final_predictions.csv'
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
     result_df.to_csv(output_path, index=False)
     

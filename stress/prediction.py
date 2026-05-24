@@ -20,7 +20,7 @@ FEATURE_COLUMNS = [
     "HRV_RMSSD_Diff"
 ]
 
-def predict_stress(merged_df):
+def predict_stress(merged_df, output_path='data/predictions/final_predictions.csv'):
     if merged_df.empty:
         return pd.DataFrame()
         
@@ -58,7 +58,6 @@ def predict_stress(merged_df):
     label_map = {0: 'Non-Stress', 1: 'Stress'}
     result_df['Stress_Status'] = result_df['Predicted_Label'].map(label_map)
     
-    output_path = 'data/predictions/final_predictions.csv'
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
     result_df.to_csv(output_path, index=False)
     

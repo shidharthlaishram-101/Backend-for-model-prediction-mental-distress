@@ -81,7 +81,7 @@ def build_hrv_table(df):
             continue
     return pd.DataFrame(rows)
 
-def extract_features(df):
+def extract_features(df, output_path='data/processed/features.csv'):
     if df.empty:
         return pd.DataFrame()
         
@@ -100,7 +100,6 @@ def extract_features(df):
         merged_df['EDA_Tonic_Diff'] = merged_df['EDA_Tonic_Mean'].diff().fillna(0)
         merged_df['HRV_RMSSD_Diff'] = merged_df['HRV_RMSSD'].diff().fillna(0)
         
-        output_path = 'data/processed/features.csv'
         os.makedirs(os.path.dirname(output_path), exist_ok=True)
         merged_df.to_csv(output_path, index=False)
         return merged_df

@@ -11,12 +11,15 @@ from prediction import predict_anxiety
 from firebase_upload import upload_result
 
 def setup_folders():
+    text_dir = '../text file'
     folders = [
         'data/raw',
         'data/processed',
         'data/predictions',
         'models',
-        'firebase'
+        'firebase',
+        text_dir,
+        f'{text_dir}/anxiety'
     ]
     for folder in folders:
         os.makedirs(folder, exist_ok=True)
@@ -27,21 +30,29 @@ if __name__ == "__main__":
     print("STEP 1 - Subject Information")
     get_user_info()
     
-    input_file = "data/noeldata.txt"
-    if not os.path.exists(input_file):
-        print(f"\nError: The file '{input_file}' was not found.")
+    text_dir = "../text file"
+    output_dir = "../text file/anxiety"
+    
+    txt_files = [f for f in os.listdir(text_dir) if f.endswith('.txt')]
+    if not txt_files:
+        print(f"\nError: No .txt files found in '{text_dir}'.")
         print("Please place your raw text file at that location and run the script again.")
         sys.exit(1)
+        
+    input_file = os.path.join(text_dir, txt_files[0])
         
     if os.path.getsize(input_file) == 0:
         print(f"\nError: The file '{input_file}' is empty. Please provide a file with data.")
         sys.exit(1)
     
+    print(f"\nUsing input file: {input_file}")
+    
     print("\nSTEP 2 - Convert TXT to CSV")
-    convert_and_clean_txt(input_file=input_file, output_file="data/cleaned_output.csv")
+    cleaned_csv = "data/cleaned_output.csv"
+    convert_and_clean_txt(input_file=input_file, output_file=cleaned_csv)
     
     print("\nSTEP 3 - Preprocess")
-    processed_df = preprocess_data('data/cleaned_output.csv')
+    processed_df = preprocess_data(cleaned_csv)
     
     if not processed_df.empty:
         print("\nSTEP 4 - Feature Extraction")

@@ -38,7 +38,7 @@ def extract_ecg_features(segment):
         hrv_std, hrv_mean = 0.0, 0.0
     return [mean, std, mn, mx, rms, hrv_std, hrv_mean]
 
-def extract_features(df):
+def extract_features(df, output_path='data/processed/features.csv'):
     if df.empty:
         return pd.DataFrame()
         
@@ -84,7 +84,6 @@ def extract_features(df):
         print("Feature extraction failed: Insufficient data to form windows.")
         return pd.DataFrame()
     
-    output_path = 'data/processed/features.csv'
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
     features_df.to_csv(output_path, index=False)
     

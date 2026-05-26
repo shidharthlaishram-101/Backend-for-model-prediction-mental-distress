@@ -17,10 +17,18 @@ DURATION = 600  # 10 minutes
 CHUNK_SIZE = 4096
 
 
+from firebase_upload import fetch_user_id
+
 # ---------------- USER INFO ----------------
 def get_user_info():
 
     print("\n--- Subject Information ---")
+    
+    user_id = fetch_user_id()
+    if user_id:
+        print(f"Fetched User ID from Firebase: {user_id}")
+    else:
+        print("No User ID found in Firebase.")
 
     name = input("Enter User Name: ")
     age = input("Enter Age: ")

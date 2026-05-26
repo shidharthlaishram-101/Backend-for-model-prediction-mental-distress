@@ -17,6 +17,20 @@ if not firebase_admin._apps:
     except Exception as e:
         print(f"Warning: Firebase initialization failed. Please ensure '{FIREBASE_KEY_PATH}' exists.\nError: {e}")
 
+def fetch_user_id():
+    try:
+        ref = db.reference('active_session')
+        sessions = ref.get()
+        if sessions:
+            pending_sessions = {k: v for k, v in sessions.items() if v.get('status') == 'pending'}
+            if pending_sessions:
+                sorted_sessions = sorted(pending_sessions.items(), key=lambda x: x[1].get('timestamp', ''))
+                return sorted_sessions[0][0]
+        return None
+    except Exception as e:
+        print(f"Failed to fetch user ID: {e}")
+        return None
+
 def get_user_name():
     try:
         with open('data/user_info.txt', 'r', encoding='utf-8') as f:
@@ -27,7 +41,7 @@ def get_user_name():
         pass
     return "Unknown User"
 
-def upload_result(result_df):
+def upload_result(result_df, uid=None):
     if result_df.empty:
         print("No predictions to upload.")
         return
@@ -35,10 +49,20 @@ def upload_result(result_df):
     try:
         # We upload the most recent window result to match the Colab logic
         latest_data = result_df.iloc[-1].to_dict()
-        latest_data['User_Name'] = get_user_name()
         
-        ref = db.reference('anxiety_monitoring/latest')
-        ref.set(latest_data)
-        print(f'Successfully uploaded latest prediction for {latest_data["User_Name"]} to Firebase!')
+        filtered_data = {
+            'Anxiety_Status': latest_data.get('Anxiety_Status'),
+            'Predicted_Label': latest_data.get('Predicted_Label')
+        }
+        
+        if uid:
+            ref = db.reference(f'anxiety_monitoring/{uid}')
+            ref.set(filtered_data)
+            db.reference(f'active_session/{uid}').update({'status': 'done'})
+            print(f'Successfully uploaded prediction for {filtered_data["User_Name"]} to anxiety_monitoring/{uid}!')
+        else:
+            ref = db.reference('anxiety_monitoring/latest')
+            ref.set(filtered_data)
+            print(f'Successfully uploaded latest prediction for {filtered_data["User_Name"]} to Firebase!')
     except Exception as e:
         print(f"Failed to upload to Firebase: {e}")
